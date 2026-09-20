@@ -569,12 +569,14 @@
                             </div>
                             
                             <!-- Heatmap Grid Container -->
-                            <div class="w-full">
-                                <div id="lc-heatmap-grid" class="flex hm-col mb-2">
-                                    <!-- JS will populate cols -->
-                                </div>
-                                <div class="flex justify-between text-[11px] text-gray-400 px-2 pt-1 pr-4">
-                                    <span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span>
+                            <div id="lc-heatmap-scroll" class="w-full overflow-x-auto no-scrollbar">
+                                <div class="min-w-max">
+                                    <div id="lc-heatmap-grid" class="flex hm-col mb-2">
+                                        <!-- JS will populate cols -->
+                                    </div>
+                                    <div class="flex justify-between text-[11px] text-gray-400 px-1 pt-1">
+                                        <span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -765,6 +767,12 @@
                     }
                     heatmapContainer.appendChild(colDiv);
                 }
+            }
+
+            // Auto-scroll to the most recent weeks on mobile devices
+            const heatmapScroll = document.getElementById('lc-heatmap-scroll');
+            if (heatmapScroll) {
+                heatmapScroll.scrollLeft = heatmapScroll.scrollWidth;
             }
 
             // Fetch Live Leetcode Data
