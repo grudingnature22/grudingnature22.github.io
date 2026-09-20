@@ -245,7 +245,7 @@
                     </div>
                     <h2 class="font-space text-3xl font-bold text-white mb-6">FPGA Acceleration</h2>
                     
-                    <!-- Dense FPGA SVG Visualization (Overlay text removed, dense paths added) -->
+                    <!-- Dense FPGA SVG Visualization -->
                     <div class="relative w-full max-w-lg mx-auto rounded-xl bg-[#030303] border border-white/5 overflow-hidden shadow-[0_0_30px_rgba(255,123,0,0.05)] mb-8 p-1">
                         <svg viewBox="0 0 600 350" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -404,19 +404,18 @@
                             <span class="text-[10px] text-slate ml-3">hft_sync_fifo.v</span>
                         </div>
                         <div class="p-4 overflow-x-auto text-[11px] leading-relaxed">
-<pre><code><span class="syn-comment">// Parameterized FWFT Synchronous FIFO for fast path routing</span>
-<span class="syn-keyword">module</span> <span class="syn-func">hft_sync_fifo</span> #(
-    <span class="syn-keyword">parameter</span> <span class="syn-type">DATA_WIDTH</span> = <span class="syn-num">256</span>,
-    <span class="syn-keyword">parameter</span> <span class="syn-type">ADDR_WIDTH</span> = <span class="syn-num">4</span>
-)(
-    <span class="syn-keyword">input</span>  <span class="syn-type">wire</span>                  clk,
-    <span class="syn-keyword">input</span>  <span class="syn-type">wire</span>                  wr_en,
-    <span class="syn-keyword">input</span>  <span class="syn-type">wire</span> [DATA_WIDTH-1:0] din,
-    <span class="syn-keyword">input</span>  <span class="syn-type">wire</span>                  rd_en,
-    <span class="syn-keyword">output</span> <span class="syn-type">wire</span> [DATA_WIDTH-1:0] dout
-);
-    <span class="syn-comment">// Direct BRAM instantiation for deterministic timing</span>
-<span class="syn-keyword">endmodule</span></code></pre>
+<pre><code><span class="syn-keyword">template</span> &lt;<span class="syn-keyword">typename</span> <span class="syn-type">T</span>, size_t <span class="syn-type">Capacity</span>&gt;
+<span class="syn-keyword">class</span> <span class="syn-func">SPSCQueue</span> {
+    <span class="syn-keyword">static_assert</span>((Capacity &amp; (Capacity - <span class="syn-num">1</span>)) == <span class="syn-num">0</span>, <span class="syn-string">"Capacity must be power of 2"</span>);
+<span class="syn-keyword">private</span>:
+    <span class="syn-keyword">static</span> <span class="syn-keyword">constexpr</span> size_t MASK = Capacity - <span class="syn-num">1</span>;
+    <span class="syn-keyword">static</span> <span class="syn-keyword">constexpr</span> size_t CACHE_LINE = <span class="syn-num">64</span>;
+
+    <span class="syn-comment">// Padding prevents false sharing between producers and consumers</span>
+    <span class="syn-keyword">alignas</span>(CACHE_LINE) std::atomic&lt;size_t&gt; head_{<span class="syn-num">0</span>};
+    <span class="syn-keyword">alignas</span>(CACHE_LINE) std::atomic&lt;size_t&gt; tail_{<span class="syn-num">0</span>};
+    <span class="syn-keyword">alignas</span>(CACHE_LINE) std::array&lt;T, Capacity&gt; buffer_;
+};</code></pre>
                         </div>
                     </div>
                 </div>
@@ -555,9 +554,9 @@
                             </div>
                         </div>
 
-                        <!-- Heatmap Panel - Fixed overflowing width -->
-                        <div class="bg-[#282828] rounded-xl p-5 shadow-lg w-full no-scrollbar border border-[#3a3a3a]">
-                            <div class="flex flex-wrap justify-between items-end gap-2 mb-4 w-full pr-4">
+                        <!-- Heatmap Panel - Mobile Overflow Fixed -->
+                        <div class="bg-[#282828] rounded-xl p-5 shadow-lg w-full border border-[#3a3a3a] overflow-hidden">
+                            <div class="flex flex-wrap justify-between items-end gap-2 mb-4 w-full">
                                 <div class="text-gray-400 flex items-center text-sm">
                                     <span class="text-white text-lg font-semibold mr-1.5">31</span> submissions in the past one year 
                                     <svg class="w-3.5 h-3.5 text-gray-500 ml-1.5 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -569,12 +568,14 @@
                             </div>
                             
                             <!-- Heatmap Grid Container -->
-                            <div class="w-full">
-                                <div id="lc-heatmap-grid" class="flex hm-col mb-2">
-                                    <!-- JS will populate cols -->
-                                </div>
-                                <div class="flex justify-between text-[11px] text-gray-400 px-2 pt-1 pr-4">
-                                    <span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span>
+                            <div class="w-full overflow-x-auto no-scrollbar pb-2">
+                                <div class="min-w-max pr-4">
+                                    <div id="lc-heatmap-grid" class="flex hm-col mb-2">
+                                        <!-- JS will populate cols -->
+                                    </div>
+                                    <div class="flex justify-between text-[11px] text-gray-400 px-2 pt-1">
+                                        <span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
